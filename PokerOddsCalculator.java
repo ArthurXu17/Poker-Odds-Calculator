@@ -265,7 +265,7 @@ public class PokerOddsCalculator {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
-		/*for(int i = 0; i < 1000; i++) {
+		/*for(int i = 0; i < 100; i++) {
 			
 			Card[] player1 = new Card[2];
 			player1[0] = new Card((int)(Math.random()*13+2),(int)(Math.random()*4));
@@ -327,13 +327,11 @@ public class PokerOddsCalculator {
 				arrcounter++;
 			}
 		}
-		/*for(int i = 0; i <= 47; i++) {
-			deck[i] = new Card(i+5);
-		}*/
 		for(int i = 0; i < deck.length; i++) {
 			deck[i].print();
 		}
 		System.out.println();
+		long startTime = System.nanoTime();
 		Card[][] allCombinations = generateCardCombinations(deck,5);
 		double numerator0 = 0.0;//draws
 		double numerator1 = 0.0;//p1 wins
@@ -357,7 +355,9 @@ public class PokerOddsCalculator {
 		System.out.println("Player 1 win: " + numerator1/denominator + " " + numerator1);
 		System.out.println("Player 2 win: " + numerator2/denominator + " " + numerator2);
 		System.out.println("Split: " + numerator0/denominator + " " + numerator0);
-		
+		long endTime = System.nanoTime();
+		long time = endTime-startTime;
+		System.out.println("Took "+time + " ns"); 
 		/*Card[] p1 = new Card[2];
 		p1[0] = new Card(41);//2S
 		p1[1] = new Card(50);//JS
@@ -372,24 +372,24 @@ public class PokerOddsCalculator {
 		mid[4] = new Card(12,2);
 		Hand h1 = new Hand(p1,mid);
 		Hand h2 = new Hand(p2, mid);
-		System.out.println(win2(h1,h2));*/
+		System.out.println(win2(h1,h2));
 		
 		/*Card[] test = new Card[7];
-		test[0] = new Card(2,2);
-		test[1] = new Card(7,1);
-		test[2] = new Card(4,2);
+		test[0] = new Card(2,1);
+		test[1] = new Card(7,2);
+		test[2] = new Card(4,1);
 		test[3] = new Card(5,1);
-		test[4] = new Card(9,3);
-		test[5] = new Card(11,2);
-		test[6] = new Card(12,2);
+		test[4] = new Card(6,1);
+		test[5] = new Card(3,1);
+		test[6] = new Card(14,2);
 		Card[] test2 = new Card[7];
-		test2[0] = new Card(2,2);
+		test2[0] = new Card(2,1);
 		test2[1] = new Card(7,2);
 		test2[2] = new Card(4,2);
 		test2[3] = new Card(5,2);
-		test2[4] = new Card(9,2);
-		test2[5] = new Card(10,2);
-		test2[6] = new Card(12,2);
+		test2[4] = new Card(8,2);
+		test2[5] = new Card(6,2);
+		test2[6] = new Card(9,3);
 	
 		Hand testHand1 = new Hand(test);
 		Hand testHand2 = new Hand(test2);
