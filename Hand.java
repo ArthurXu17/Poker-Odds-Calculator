@@ -38,9 +38,7 @@ public class Hand {
 	}
 	
 	//methods used in determineType and determineKicker*****************************************************************
-	/*all these methods assume the input array is sorted
-	 * 
-	 */
+
 	public static void print2(int[] arr) {
 		for(int i = 0; i < arr.length;i++) {
 			System.out.print(arr[i] + "  ");
@@ -67,14 +65,28 @@ public class Hand {
         output[1] = arr2;
         return output;
 	}
-	public static boolean straightFlush(int[] ranks, int[] suits) {
-		if(!straight(ranks) || !flush(suits)) {
-			return false;
+	
+	public static int[] removeElement(int[] arr, int index) {
+		int[] output = new int[arr.length-1];
+		for(int i = 0; i < index; i++) {
+			output[i] = arr[i];
 		}
-		else {
+		for(int i = index+1; i<arr.length;i++ ) {
+			output[i-1] = arr[i]; 
+		}
+		return output;
+	}
+	//***************************************************************the boolean checkers that determine if a hand is of a given type****************************************************
+	/*all these methods assume the input array is sorted
+	 * 
+	 */
+	public static boolean straightFlush(int[] ranks, int[] suits) {
+		
 			int[][] sorted = AssignedSort(ranks,suits);
 			int[] rankSorted = sorted[0];
 			int[] suitSorted = sorted[1];
+			//print2(rankSorted);
+			//print2(suitSorted);
 			//after this specfic sorting (where rank and suit remain linked), it's just the straight method
 			int dupecounter= 0;//legit only used for finding a,2,3,4,5 straight
 			
@@ -114,7 +126,7 @@ public class Hand {
 				}
 				return false;
 			}
-		}
+		
 	}
 	public static boolean has4(int[] arr) {//requires sorted array as input
 		for(int i = 3; i < arr.length; i++) {
@@ -278,9 +290,16 @@ public class Hand {
 			type = 7;
 			return 7;
 		}
-		else if(straightFlush(rankArr3,suitArr3)) {//for efficiency, put after quad and fh, because we can't have either of those hands along with a sf.
-			type = 9;
-			return 9;
+		//can't have straight flush and 4 of a kind or fh in texas hold'em
+		else if(flush(suitArr2) && straight(rankArr2)) {
+			if(straightFlush(rankArr3,suitArr3)) {
+				type = 9;
+				return 9;
+			}
+			else {
+				type = 6;
+				return 6;
+			}
 		}
 		else if(flush(suitArr2)) {
 			type = 6;
@@ -308,6 +327,8 @@ public class Hand {
 		}
 	}
 	public int[] determineKicker() {
+		//the kicker array is used to differentiate between hands of the same type
+		//all the algorithms used within this method assume that the input hand satisfies the conditions of each type
 		int[] output;
 		//make duplicates because i don't want to actually change/sort the arrays
 		int[] rankArr2 = new int[size];
@@ -324,7 +345,56 @@ public class Hand {
 		Arrays.sort(suitArr2);
 		Arrays.sort(rankArr2);
 		if(type == 9) {//straight flush
-			return rankArr2;
+			//determine the suit that has 5+ in
+			//remove elements that are not of that suit, this also means that no need to check for pairs
+			//perform assigned sort
+			//loop from top, if it has the common suit and is one greater than one below it and two greater than the one below that, we good
+			output = new int[1];
+			int[] suitDeterminer = new int[4];
+			int suit = 0;//suit that occurs 5 times
+			for(int i = 0; i <4;i++) {
+				suitDeterminer[i] = 0;
+			}
+			for(int i = 0; i < size;i++) {
+				suitDeterminer[suitArr3[i]]++;//assumes that suits are 0,1,2,3
+			}
+			for(int i = 0; i < 4;i++) {
+				if(suitDeterminer[i] >= 5) {
+					suit = i;
+					break;
+				}
+			}
+			/*int[] rankdupe = new int[rankArr3.length];//make a duplicate so we can remove without issues
+			for(int i = 0; i < rankArr3.length;i++) {
+				rankdupe[i] = rankArr3[i];
+			}*/
+			int removecounter = 0;//counter to track how many elements have already been removed
+			for(int i = 0; i < suitArr3.length;i++) {//be sure to use suitArr.length as rankArr.length is changing as we go through loop
+				
+				if(suitArr3[i] != suit) {
+					//with each subsequent removal, the array decreases size by one
+					rankArr3 = removeElement(rankArr3,i-removecounter);
+					removecounter++;
+					//System.out.println("removecounter: " + removecounter);
+				}
+
+			}
+			Arrays.sort(rankArr3);
+			boolean hasOtherStraight = false;
+			//only have the suit of interest, just do the straight algorithm
+			//print2(rankArr3);
+			for(int i = rankArr3.length-1; i >=4; i--) {
+				if(rankArr3[i] == rankArr3[i-1] + 1 && rankArr3[i-1] == rankArr3[i-2] + 1 && rankArr3[i-2] == rankArr3[i-3] + 1 && rankArr3[i-3] == rankArr3[i-4] + 1) {
+					output[0] = rankArr3[i];
+					hasOtherStraight = true;
+					break;
+				}
+			}
+			if(!hasOtherStraight) {
+				output[0] = 5;
+			}
+			return output;
+			
 		}
 		else if(type == 8) {//4 of a kind
 			output = new int[2];
