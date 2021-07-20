@@ -99,4 +99,13 @@ public class Card {
 			}
 		}
 	}
+
+	public boolean equals(Card input) {
+		if(rank == input.rank && suit == input.suit) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
 }
