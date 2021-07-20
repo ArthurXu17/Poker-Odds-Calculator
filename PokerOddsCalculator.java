@@ -85,60 +85,58 @@ public class PokerOddsCalculator {
 		
 	}
 	
-	//public static ArrayList<Integer> win (ArrayList<Hand> input){ 
+	public static int[] win(Hand[] input) {
 		/*
-		 * Returns the winning hand(s) when there are mulitple hands to look at.
-		 * 
+		 * returns the array index of winner (0 to n-1)
+		 	if output.length = 1, there is only one winner
+		 	otherwise there is tie
+		 	
+		 	method compares adjacent elements and keeps track of 
 		 */
-		/*int maxType=0;
-		ArrayList<Integer> output = new ArrayList<Integer>(0);
+		int[] output = new int[1];
+		output[0] = 0;
+		for(int i = 0; i < input.length-1;i++) {
+			if(win2(input[i],input[i+1]) == 1) {
+				input[i+1] = input[i];
+			}
+			else if (win2(input[i],input[i+1]) == 2){
+				output = new int[1];
+				output[0] = i+1;
+			}
+			else {
+				output = addElement(output,i+1);
+			}
+		}
+		return output;
+	}
 	
-		for(int i = 0; i < input.size();i++) {
-			int currentType =input.get(i).determineType(); 
-			if(currentType > maxType) {
-				maxType = currentType;
+	public static int[] wintest(int[] input) {
+		int[] output = new int[1];
+		output[0] = 0;
+		for(int i = 0; i < input.length-1;i++) {
+			if(input[i]>input[i+1]) {
+				input[i+1] = input[i];
+			}
+			else if (input[i]<input[i+1]){
+				output = new int[1];
+				output[0] = i+1;
+			}
+			else {
+				output = addElement(output,i+1);
 			}
 		}
-		//remove all things that are not of the highest rank
-		int winnerCounter = 1;//used for if there is only one winner
-		for(int i = 0; i < input.size();i++) {
-			try {
-				int currentType =input.get(i).determineType(); 
-				if(currentType < maxType) {
-					input.remove(i);
-					i--;
-				}
-				else {
-					output.add(winnerCounter);
-				}
-				winnerCounter++;
-				
-			}
-			catch(IndexOutOfBoundsException e) {
-				break;
-			}
-			
+		return output;
+	}
+	
+	public static int[] addElement(int[] arr, int n) {
+		int[] output = new int [arr.length+1];
+		for(int i = 0; i < arr.length; i++) {
+			output[i] = arr[i];
 		}
-		if(input.size()==1) {//if there is only one hand left that has the highest rank, that is the only winner, and so we return that
-			return output;
-					
-		}
-		else {//have to look at kickers now
-			int kickerlength = input.get(0).determineKicker().length;
-			int[][] kickers = new int[output.size()][kickerlength];
-			for(int i = 0; i < output.size(); i++) {//setting up an array of the kicker arrays of each hand that is still included in input
-				int[] currentKicker = input.get(i).determineKicker();
-				for(int j = 0; j < kickerlength;j++) {
-					kickers[i][j] = currentKicker[j];
-				}
-			}
-			for(int column = kickerlength-1; column >=0;column--) {
-				//find max for each column, then remove any kickers that aren't included
-				//incomplete
-			}
-			return output;
-		}
-	}*/
+		output[arr.length] = n;
+		return output;
+	}
+	
 	
 	//************************************************************methods to determine all combinations of deck**********************************************************
 	
@@ -261,43 +259,138 @@ public class PokerOddsCalculator {
     	}while(findNextPermutation(permutations));
     	return result;
     }
+    
+    //************************************8methods to help remove cards from the deck************************************************
+    
+    public static boolean containsElement(Card[] arr, Card n) {
+    	for(int i = 0; i < arr.length;i++) {
+    		if(arr[i].equals(n)) {
+    			return true;
+    		}
+    	}
+    	return false;
+    }
+    public static Card[] removeCard(Card[] arr, int index) {
+		Card[] output = new Card[arr.length-1];
+		for(int i = 0; i < index; i++) {
+			output[i] = arr[i];
+		}
+		for(int i = index+1; i<arr.length;i++ ) {
+			output[i-1] = arr[i]; 
+		}
+		return output;
+    }
+    public static Card[] removeElements(Card [] arr, Card[] remove) {
+    	//this method assumes that remove is a subset of arr
+    	if(remove.length==0) {
+    		return arr;
+    	}
+    	else {
+    		Card[] output = new Card[arr.length-remove.length];
+        	int removedcounter = 0;
+        	for(int i = 0; i < arr.length; i++) {
+        		if(!containsElement(remove,arr[i])) {
+        			output[i-removedcounter] = new Card(arr[i].rank,arr[i].suit);
+        		}
+        		else {
+        			removedcounter++;
+        		}
+        	}
+        	return output;
+    	}
+
+    }
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
-		/*for(int i = 0; i < 100; i++) {
+		
+		//**************************************************************Code that determines probability of winning for n number of players*******************************************8
+		
+		//start by making deck
+		Card[] deck = new Card[52];
+		for(int j = 0; j < 52; j++) {
+			deck[j] = new Card(j+1);
+		}
+		
+		//make the array that stores the 2 cards that each player gets
+		int playernum = 4;
+		Card[][] playerCardArrays = new Card[playernum][2];//an array that contains the 2 cards that each player has
+		for(int i = 0; i < playernum; i++) {
+			int index0 = (int)(Math.random()*deck.length);//pick random index from deck
+			playerCardArrays[i][0] = deck[index0];//take the card at that index and put in 2d array
+			deck = removeCard(deck,index0);//remove that card from the deck array
+			int index1 = (int)(Math.random()*deck.length);
+			playerCardArrays[i][1] = deck[index1];
+			deck = removeCard(deck,index1);
 			
-			Card[] player1 = new Card[2];
-			player1[0] = new Card((int)(Math.random()*13+2),(int)(Math.random()*4));
-			player1[1] = new Card((int)(Math.random()*13+2),(int)(Math.random()*4));
-			
-			Card[] player2 = new Card[2];
-			player2[0] = new Card((int)(Math.random()*13+2),(int)(Math.random()*4));
-			player2[1] = new Card((int)(Math.random()*13+2),(int)(Math.random()*4));
-			
-			Card[] deal = new Card[5];
-			deal[0] = new Card((int)(Math.random()*13+2),(int)(Math.random()*4));
-			deal[1] = new Card((int)(Math.random()*13+2),(int)(Math.random()*4));
-			deal[2] = new Card((int)(Math.random()*13+2),(int)(Math.random()*4));
-			deal[3] = new Card((int)(Math.random()*13+2),(int)(Math.random()*4));
-			deal[4] = new Card((int)(Math.random()*13+2),(int)(Math.random()*4));
-			Hand testHand1 = new Hand(player1,deal);
-			print(testHand1.rankArr);
-			print(testHand1.suitArr);
-			printType(testHand1.determineType());
-			print2(testHand1.determineKicker());
-			Hand testHand2 = new Hand(player2,deal);
-			print(testHand2.rankArr);
-			print(testHand2.suitArr);
-			printType(testHand2.determineType());
-			print2(testHand2.determineKicker());
-			System.out.println(win2(testHand1,testHand2));
+			System.out.println("Player " + i);
+			playerCardArrays[i][0].print();
+			playerCardArrays[i][1].print();
 			System.out.println();
-			
-		}*/
+		}
+		//make the board
+		System.out.println("Board");
+		int boardsize = (int) (Math.random()*3);
+		if(boardsize == 1) {
+			boardsize = 3;
+		}
+		else if(boardsize == 2) {
+			boardsize = 4;
+		}
+		else {
+			System.out.println("Empty");
+		}
 		
+		Card[] board = new Card[boardsize];
+		for(int i = 0; i < boardsize; i++) {
+			int bindex = (int)(Math.random()*deck.length);
+			board[i] = deck[bindex];
+			deck = removeCard(deck,bindex);
+		}
 		
-		int a1 = (int)(Math.random()*52+1);
+		for(int i = 0; i < boardsize; i++) {
+			board[i].print();
+		}
+		System.out.println();
+		//make the counters
+		double[] wincounter = new double[playernum];
+		double[] tiecounter = new double[playernum];
+		double denominator = 0.0;
+		for(int i = 0; i < playernum; i++) {
+			wincounter[i] = 0.0;
+			tiecounter[i] = 0.0;
+		}
+		long startTime = System.nanoTime();
+		//generate all possible combinations of remaining cards in deck
+		Card[][] allCombinations = generateCardCombinations(deck,5-boardsize);
+		
+		for(int i = 0; i < allCombinations.length; i++) {
+			Hand[] playerHands = new Hand[playernum];
+			for(int j = 0; j < playernum; j++) {
+				playerHands[j] = new Hand(playerCardArrays[j],board,allCombinations[i]);
+			}
+			int[] winners = win(playerHands);
+			if(winners.length==1) {
+				wincounter[winners[0]]++;
+			}
+			else {
+				for(int j = 0; j < winners.length;j++) {
+					tiecounter[winners[j]]++;
+				}
+			}
+			denominator++;
+		}
+		
+		for(int i = 0; i < playernum; i++) {
+			System.out.println("Player " + i + " Win Chance: " + wincounter[i]/denominator);
+			System.out.println("Player " + i + " Split Chance: " + tiecounter[i]/denominator);
+		}
+		long endTime = System.nanoTime();
+		System.out.println("Took " + (endTime-startTime) + " ns");
+		//*******************************************************************Code that compares 2 ppl, confirmed to work*********************************************************************
+		//making the hands of the 2 players
+		/*int a1 = (int)(Math.random()*52+1);
 		int a2 = (int)(Math.random()*52+1);
 		int b1 = (int)(Math.random()*52+1);
 		int b2 = (int)(Math.random()*52+1);
@@ -318,28 +411,39 @@ public class PokerOddsCalculator {
 		Card[] player2 = new Card[2];
 		player2[0] = new Card(b1);
 		player2[1] = new Card(b2);
+		//making the deck and removing the players' cards from the deck
+		Card takenCards[] = {Ca1,Ca2,Cb1,Cb2}; 
 		
-		Card[] deck = new Card[48];
-		int arrcounter = 0;
-		for(int i = 1; i <= 52; i++) {
-			if(i != a1 &&i != a2 &&i != b1 &&i != b2) {
-				deck[arrcounter] = new Card(i);
-				arrcounter++;
-			}
+		Card[] deck = new Card[52];
+		for(int i = 1; i <=52; i++) {
+			deck[i-1] = new Card(i);
 		}
+		deck = removeElements(deck,takenCards);
+		//making the board
+		int boardsize = (int)(Math.random()*5);//board size from 0 to 4
+		Card[] board = new Card[boardsize];
+		for(int i = 0; i <boardsize; i++) {
+			board[i] = new Card((int)(Math.random()*52+1));
+		}
+		System.out.print("Board: ");
+		for(int i = 0; i < board.length;i++) {
+			board[i].print();
+		}
+		System.out.println();
+		deck = removeElements(deck,board);
 		for(int i = 0; i < deck.length; i++) {
 			deck[i].print();
 		}
 		System.out.println();
 		long startTime = System.nanoTime();
-		Card[][] allCombinations = generateCardCombinations(deck,5);
+		Card[][] allCombinations = generateCardCombinations(deck,5-boardsize);
 		double numerator0 = 0.0;//draws
 		double numerator1 = 0.0;//p1 wins
 		double numerator2 = 0.0;//p2 wins
 		double denominator = 0.0;
 		for(int i = 0; i < allCombinations.length;i++) {
-			Hand hand1 = new Hand(player1,allCombinations[i]);
-			Hand hand2 = new Hand(player2, allCombinations[i]);
+			Hand hand1 = new Hand(player1,board,allCombinations[i]);
+			Hand hand2 = new Hand(player2,board,allCombinations[i]);
 			int result = win2(hand1,hand2);
 			if(result == 1) {
 				numerator1++;
@@ -356,8 +460,100 @@ public class PokerOddsCalculator {
 		System.out.println("Player 2 win: " + numerator2/denominator + " " + numerator2);
 		System.out.println("Split: " + numerator0/denominator + " " + numerator0);
 		long endTime = System.nanoTime();
+		
 		long time = endTime-startTime;
-		System.out.println("Took "+time + " ns"); 
+		System.out.println("Took "+time + " ns");*/
+		
+		
+		//***********************************************Code to check if the win determiner works for mass cases***********************************************
+		/*for(int i = 0; i < 100; i++) {
+			
+			Card[] deck = new Card[52];
+			for(int j = 0; j < 52; j++) {
+				deck[j] = new Card(j+1);
+			}
+			
+			Card[] player1 = new Card[2];
+			int p11 = (int)(Math.random()*deck.length);
+			player1[0] = deck[p11];
+			deck = removeCard(deck, p11);
+			int p12 = (int)(Math.random()*deck.length);
+			player1[1] = deck[p12];
+			deck =removeCard(deck, p12);
+			
+			Card[] player2 = new Card[2];
+			int p21 = (int)(Math.random()*deck.length);
+			player2[0] = deck[p21];
+			deck =removeCard(deck, p21);
+			int p22 = (int)(Math.random()*deck.length);
+			player2[1] = deck[p22];
+			deck =removeCard(deck, p22);
+			
+			Card[] player3 = new Card[2];
+			int p31 = (int)(Math.random()*deck.length);
+			player3[0] = deck[p31];
+			deck =removeCard(deck, p31);
+			int p32 = (int)(Math.random()*deck.length);
+			player3[1] = deck[p32];
+			deck =removeCard(deck, p32);
+			
+			Card[] player4 = new Card[2];
+			int p41 = (int)(Math.random()*deck.length);
+			player4[0] = deck[p41];
+			deck =removeCard(deck, p41);
+			int p42 = (int)(Math.random()*deck.length);
+			player4[1] = deck[p42];
+			deck =removeCard(deck, p42);
+
+			
+			Card[] deal = new Card[5];
+			int d0 = (int)(Math.random()*deck.length);
+			deal[0] = deck[d0];
+			deck =removeCard(deck,d0);
+			int d1 = (int)(Math.random()*deck.length);
+			deal[1] = deck[d1];
+			deck =removeCard(deck,d1);
+			int d2 = (int)(Math.random()*deck.length);
+			deal[2] = deck[d2];
+			deck =removeCard(deck,d2);
+			int d3 = (int)(Math.random()*deck.length);
+			deal[3] = deck[d3];
+			deck =removeCard(deck,d3);
+			int d4 = (int)(Math.random()*deck.length);
+			deal[4] = deck[d4];
+			deck =removeCard(deck,d4);
+			
+			
+			System.out.println("Hand 1");
+			Hand testHand1 = new Hand(player1,deal);
+			testHand1.print();
+			printType(testHand1.determineType());
+			print2(testHand1.determineKicker());
+			System.out.println("Hand 2");
+			Hand testHand2 = new Hand(player2,deal);
+			testHand2.print();
+			printType(testHand2.determineType());
+			print2(testHand2.determineKicker());
+			System.out.println("Hand 3");
+			Hand testHand3 = new Hand(player3,deal);
+			testHand3.print();
+			printType(testHand3.determineType());
+			print2(testHand3.determineKicker());
+			System.out.println("Hand 4");
+			Hand testHand4 = new Hand(player4,deal);
+			testHand4.print();
+			printType(testHand4.determineType());
+			print2(testHand4.determineKicker());
+			
+			Hand all4Hands[] = {testHand1,testHand2,testHand3,testHand4}; 
+			print2(win(all4Hands));
+			System.out.println("\n");
+			
+		}*/
+		
+		
+		
+		//*******************************************************Code for testing very specific cases*****************************************
 		/*Card[] p1 = new Card[2];
 		p1[0] = new Card(41);//2S
 		p1[1] = new Card(50);//JS
@@ -370,11 +566,9 @@ public class PokerOddsCalculator {
 		mid[2] = new Card(8,2);
 		mid[3] = new Card(9,2);
 		mid[4] = new Card(12,2);
-		Hand h1 = new Hand(p1,mid);
-		Hand h2 = new Hand(p2, mid);
-		System.out.println(win2(h1,h2));
 		
-		/*Card[] test = new Card[7];
+		
+		Card[] test = new Card[7];
 		test[0] = new Card(2,1);
 		test[1] = new Card(7,2);
 		test[2] = new Card(4,1);
@@ -391,13 +585,27 @@ public class PokerOddsCalculator {
 		test2[5] = new Card(6,2);
 		test2[6] = new Card(9,3);
 	
-		Hand testHand1 = new Hand(test);
-		Hand testHand2 = new Hand(test2);
+		Hand testHand1 = new Hand(test);//2D,7H,4D,5D,6D,3D,14H (2nd)
+		Hand testHand2 = new Hand(test2);//2D,7H,4H,5H,8H,6H,9S (1st)
+		Hand testHand3 = new Hand(p1,mid);//2S,JS,4H,7H,8H,9H,12H (3rd)
+		Hand testHand4 = new Hand(p2,mid);//9C,3C,4H,7H,8H,9H,12H (3rd)
+		System.out.println("Hand1");
 		System.out.println(testHand1.determineType());
-		print(testHand1.determineKicker());
+		print2(testHand1.determineKicker());
+		System.out.println("Hand2");
 		System.out.println(testHand2.determineType());
-		print(testHand2.determineKicker());
-		System.out.println(win2(testHand1,testHand2));*/
+		print2(testHand2.determineKicker());
+		System.out.println("Hand3");
+		System.out.println(testHand3.determineType());
+		print2(testHand3.determineKicker());
+		System.out.println("Hand4");
+		System.out.println(testHand4.determineType());
+		print2(testHand4.determineKicker());
+		Hand hands[] = {testHand4,testHand2,testHand2,testHand1};
+		int[] winners = win(hands);
+		System.out.println(winners.length);
+		print2(winners);*/
+		
 	}
 
 }
