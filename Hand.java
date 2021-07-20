@@ -37,6 +37,34 @@ public class Hand {
 		}
 	}
 	
+	public Hand(Card[] input1, Card[] input2, Card[] input3) {
+		int l1 = input1.length;
+		int l2 = input2.length;
+		int l3 = input3.length;
+		
+		int n = l1+l2+l3;
+		size = n;
+		arr = new Card[n];
+		suitArr = new int[n];
+		rankArr = new int[n];
+		
+		for(int i = 0; i < input1.length;i++) {
+			arr[i] = input1[i];
+			suitArr[i] = input1[i].suit;
+			rankArr[i] = input1[i].rank;
+		}
+		for(int i = l1; i < l1 + l2; i++) {
+			arr[i] = input2[i-l1];
+			suitArr[i] = input2[i-l1].suit;
+			rankArr[i] = input2[i-l1].rank;
+		}
+		for(int i = l1+l2; i < n; i++) {
+			arr[i] = input3[i-l1-l2];
+			suitArr[i] = input3[i-l1-l2].suit;
+			rankArr[i] = input3[i-l1-l2].rank;
+		}
+	}
+	
 	//methods used in determineType and determineKicker*****************************************************************
 
 	public static void print2(int[] arr) {
@@ -566,6 +594,13 @@ public class Hand {
 		}
 		return output;
 		
+	}
+	
+	public void print() {
+		for(int i = 0; i < size; i++) {
+			arr[i].print();
+		}
+		System.out.println();
 	}
 	
 	/*public void printNumbers() {
