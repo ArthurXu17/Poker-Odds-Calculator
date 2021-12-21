@@ -582,7 +582,11 @@ public class Hand {
 			output[0] = rankArr2[size-3];
 		}
 		else {
-			return rankArr2;//if high card, sorted ranks is good enough
+			//if high card, top 5 cards in sorted ranks is good enough
+			output = new int[5];
+			for(int i = 0; i < 5; i++) {
+				output[i] = rankArr2[i+2];
+			}
 		}
 		return output;
 		
