@@ -109,53 +109,44 @@ public class Hand {
 	 * 
 	 */
 	public static boolean straightFlush(int[] ranks, int[] suits) {
+		//assumes that input already contains a straight and a flush
+		//determine the suit that has 5+ in
+		//remove elements that are not of that suit, this also means that no need to check for pairs
+		//perform assigned sort
+		//loop from top, we find 5 consecutive numbers it is straight flush
 		
-			int[][] sorted = AssignedSort(ranks,suits);
-			int[] rankSorted = sorted[0];
-			int[] suitSorted = sorted[1];
-			//print2(rankSorted);
-			//print2(suitSorted);
-			//after this specfic sorting (where rank and suit remain linked), it's just the straight method
-			int dupecounter= 0;//legit only used for finding a,2,3,4,5 straight
-			
-			int[] duperanks = new int[rankSorted.length];//new array so we don't change the original array
-			int[] dupesuits = new int[rankSorted.length];
-			for(int i = 0; i < rankSorted.length;i++) {
-				duperanks[i] = rankSorted[i];
-				dupesuits[i] = suitSorted[i];
-			}
-			if(has2(rankSorted)) {//if the hand has a pair, we have to remove the pair to allow us to check consecutive numbers
-				for(int i = 1; i < rankSorted.length; i++) {
-					if(duperanks[i] == rankSorted[i-1]) {
-						duperanks[i-1] = -1;//specifically change i-1 so if dupe[i] = dupe[i+1], it will change on next iteration
-						dupecounter++;
-					}
-				}
-				AssignedSort(duperanks,dupesuits);
-			
-				if(duperanks[dupecounter] == 2 && duperanks[dupecounter+1] == 3 && duperanks[dupecounter+2] == 4 && duperanks[dupecounter+3] == 5 && duperanks[duperanks.length-1] == 14&& dupesuits[dupecounter] == dupesuits[dupecounter+1] &&dupesuits[dupecounter+1] == dupesuits[dupecounter+2] &&dupesuits[dupecounter+2] == dupesuits[dupecounter+3] &&dupesuits[dupecounter+3] == dupesuits[dupesuits.length-1]) {
-					return true;
-				}
-				for(int i = 4; i < rankSorted.length; i++) {
-					if(duperanks[i] == duperanks[i-1] + 1 && duperanks[i-1] == duperanks[i-2] + 1 && duperanks[i-2] == duperanks[i-3] + 1 && duperanks[i-3] == duperanks[i-4] + 1 && suitSorted[i] == suitSorted[i-1] && suitSorted[i-1] == dupesuits[i-2]&& dupesuits[i-2] == dupesuits[i-3]&&dupesuits[i-3] == dupesuits[i-4] ) {
-						return true;
-					}
-				}
-				return false;
-			}
-			else {
-				if(rankSorted[0] == 2 && rankSorted[1] == 3 && rankSorted[2] == 4 && rankSorted[3] == 5 && rankSorted[rankSorted.length-1] == 14 && suitSorted[0] == suitSorted[1] &&suitSorted[1] == suitSorted[2] &&suitSorted[2] == suitSorted[3] &&suitSorted[3] == suitSorted[suitSorted.length-1]) {
-					return true;
-				}
-				for(int i = 4; i < rankSorted.length; i++) {
-					if(rankSorted[i] == rankSorted[i-1] + 1 && rankSorted[i-1] == rankSorted[i-2] + 1 && rankSorted[i-2] == rankSorted[i-3] + 1 && rankSorted[i-3] == rankSorted[i-4] + 1 && suitSorted[i] == suitSorted[i-1] && suitSorted[i-1] == suitSorted[i-2]&& suitSorted[i-2] == suitSorted[i-3]&& suitSorted[i-3] == suitSorted[i-4] ) {
-						return true;
-					}
-				}
-				return false;
-			}
+		int length = ranks.length;
 		
+		//finding the suit with 5+
+		int[] suitDeterminer = new int[4];
+		int suit = 0;//suit that occurs 5 times
+		for(int i = 0; i <4;i++) {
+			suitDeterminer[i] = 0;
+		}
+		for(int i = 0; i < length;i++) {
+			suitDeterminer[suits[i]]++;//assumes that suits are 0,1,2,3
+		}
+		for(int i = 0; i < 4;i++) {
+			if(suitDeterminer[i] >= 5) {
+				suit = i;
+				break;
+			}
+		}
+		
+		int removecounter = 0;
+		for(int i = 0; i < length;i++) {
+			if(suits[i] != suit) {
+				//with each subsequent removal, the array decreases size by one
+				ranks = removeElement(ranks,i-removecounter);
+				removecounter++;
+			}
+		}
+		
+		//sort the remaining ranks and then use straight method
+		Arrays.sort(ranks);
+		return straight(ranks);
 	}
+	
 	public static boolean has4(int[] arr) {//requires sorted array as input
 		for(int i = 3; i < arr.length; i++) {
 			if(arr[i] == arr[i-1] && arr[i-1] == arr[i-2] && arr[i-2] == arr[i-3]) {
@@ -206,7 +197,8 @@ public class Hand {
 		for(int i = 0; i < arr.length;i++) {
 			dupe[i] = arr[i];
 		}
-		if(has2(arr)) {//if the hand has a pair, we have to remove the pair to allow us to check consecutive numbers
+		//if the hand has a pair, we have to remove the pair to allow us to check consecutive numbers
+		if(has2(arr)) {
 			for(int i = 1; i < arr.length; i++) {
 				if(dupe[i] == arr[i-1]) {
 					dupe[i-1] = -1;//specifically change i-1 so if dupe[i] = dupe[i+1], it will change on next iteration
@@ -214,7 +206,7 @@ public class Hand {
 				}
 			}
 			Arrays.sort(dupe);
-			if(dupe[dupecounter] == 2 && dupe[dupecounter+1] == 3 && dupe[dupecounter+2] == 4 && dupe[dupecounter+3] == 5 && dupe[dupe.length-1] == 14) {
+			if(dupecounter+3 < arr.length &&dupe[dupecounter] == 2 && dupe[dupecounter+1] == 3 && dupe[dupecounter+2] == 4 && dupe[dupecounter+3] == 5 && dupe[dupe.length-1] == 14) {
 				return true;
 			}
 			for(int i = 4; i < arr.length; i++) {
