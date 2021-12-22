@@ -12,6 +12,41 @@ public class Card {
 		}
 		suit = b;
 	}
+	
+	public Card(char a, char b) {
+		if(b == 'C') {
+			suit = 0;
+		}
+		else if (b == 'D') {
+			suit = 1;
+		}
+		else if(b == 'H') {
+			suit = 2;
+		}
+		else if(b == 'S') {
+			suit = 3;
+		}
+		
+		if (a == 'T') {
+			rank = 10;
+		}
+		else if(a == 'J') {
+			rank = 11;
+		}
+		else if (a == 'Q') {
+			rank = 12;
+		}
+		else if(a == 'K') {
+			rank = 13;
+		}
+		else if(a == 'A') {
+			rank = 14;
+		}
+		else {
+			rank = ((int) a) - 48;
+		}
+	}
+	
 	public Card (int a) {//i'm gonna assume a is from 1 to 52
 		
 		if(a%13 == 0) {
